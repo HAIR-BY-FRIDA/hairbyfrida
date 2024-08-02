@@ -1,15 +1,18 @@
+import sqlalchemy.orm
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
-Base = declarative_base()
+Base = sqlalchemy.orm.declarative_base()
+
+
 # I am creating a base class from which all the mapped classes will inherit
 
 # User Model
 class User(Base):
     # This class represents a table in the database
-    __tablename__= 'Users'
+    __tablename__ = 'Users'
     id = Column(Integer, primary_key=True)
     # Defines this id column as the unique identifier for the table and it as an integer data type
     username = Column(String, nullable=False)
@@ -18,6 +21,7 @@ class User(Base):
     # cannot be empty
     role = Column(String, nullable=False)
     # either customer, staff or Admin and it cannot be null.
+
 
 # Appointment Model
 class Appointment(Base):
@@ -28,7 +32,7 @@ class Appointment(Base):
     staff_id = Column(Integer, ForeignKey('Users.id'), nullable=True)
     # It aso references the id column in the Users table. it can be empty.
     date_time = Column(DateTime, nullable=False)
-    #This will be the column to know the date and time of the appointment
+    # This will be the column to know the date and time of the appointment
     status = Column(String, default='Pending')
     # This will show appointment status with the default being 'pending'
     # could be pending, accepted or rejected
@@ -36,6 +40,7 @@ class Appointment(Base):
     # this establishes a relationship between Appointment and Users classes using the foreign key
     staff = relationship("User", foreign_keys=[staff_id])
     # same as before
+
 
 # Creating the SQLite Database
 engine = create_engine('sqlite:///HairbyFrida.db')
