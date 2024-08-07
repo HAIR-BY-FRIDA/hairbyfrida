@@ -21,6 +21,10 @@ class User(Base):
     # cannot be empty
     role = Column(String, nullable=False)
     # either customer, staff or Admin and it cannot be null.
+    name = Column(String, nullable=False)
+    phone = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    gender = Column(String, nullable=False)
 
 
 # Appointment Model
