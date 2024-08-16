@@ -1,5 +1,5 @@
 import sqlalchemy.orm
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Date, Time, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -7,55 +7,42 @@ from datetime import datetime
 Base = sqlalchemy.orm.declarative_base()
 
 
-# I am creating a base class from which all the mapped classes will inherit
-
 # User Model
 class User(Base):
-    # This class represents a table in the database
-    __tablename__ = 'Users'
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    # Defines this id column as the unique identifier for the table and it as an integer data type
     username = Column(String, nullable=False)
-    # your username must be unique and cannot be empty. the data type is string
     password = Column(String, nullable=False)
-    # cannot be empty
-    role = Column(String, nullable=False)
-    # either customer, staff or Admin and it cannot be null.
-    phone = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
+    phone = Column(String, unique=True, nullable=False)
+    role = Column(String, nullable=False)
     gender = Column(String, nullable=False)
+
+    # Relationship to the Appointment model
+    appointments = relationship('Appointment', back_populates='user')
 
 
 # Appointment Model
 class Appointment(Base):
-    __tablename__ = 'Appointments'
+    __tablename__ = 'appointments'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('Users.id'))
-    # This colum references the id column in the Users table
-    staff_id = Column(Integer, ForeignKey('Users.id'), nullable=True)
-    # It aso references the id column in the Users table. it can be empty.
-    date_time = Column(DateTime, nullable=False)
-    # This will be the column to know the date and time of the appointment
+    user_id = Column(Integer, ForeignKey('users.id'))
+    date = Column(Date, nullable=False)
+    service = Column(String, nullable=False)
+    time = Column(String, nullable=False)
     status = Column(String, default='Pending')
-    # This will show appointment status with the default being 'pending'
-    # could be pending, accepted or rejected
-    customer = relationship("User", foreign_keys=[user_id])
-    # this establishes a relationship between Appointment and Users classes using the foreign key
-    staff = relationship("User", foreign_keys=[staff_id])
-    # same as before
+
+    # Relationship back to the User
+    user = relationship('User', back_populates='appointments')
 
 
-# Creating the SQLite Database
-engine = create_engine('sqlite:///HairbyFrida.db')
-# this will create a new SQLite Database or connect to it once it already exists. In this case, once created this
-# will ensure that it will connect to it when run again
-# The 'engine' object is the starting point for any SQLALCHEMY application
+# Set up the database
+def setup_database():
+    engine = create_engine('sqlite:///HairbyFrida.db')
+    Base.metadata.bind = engine
+    Base.metadata.create_all(engine)  # Create all tables
 
 
-# To create tables
-Base.metadata.create_all(engine)
-
-# To create a session
-Session = sessionmaker(bind=engine)
-session = Session()
-# A session is used to interact with the database. Examples are to add, update, etc
+# Only run the database setup if this script is run directly
+if __name__ == '__main__':
+    setup_database()
